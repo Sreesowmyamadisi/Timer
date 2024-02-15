@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-image: url("web.png");
+    background-position: center;
+    background-size: cover;
+    color: white;
+    background-attachment: fixed;
+    margin: 0;
+  }
+
+  #startContainer {
+    position: absolute;
+    top: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #resetButton {
+    position: absolute;
+    top: 900px;
+  }
+
+  .container {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 20px;
+  }
+
+  .button-container {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .button {
+    background-color: transparent;
+    border: 2px solid #035390;
+    color: white;
+    padding: 40px 80px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 36px;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .button:hover {
+    color: white;
+    box-shadow: 0px 0px 40px 20px #035390;
+  }
+
+  .round-container {
+    display: none; /* Initially hide the round container */
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .round {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #ccc;
+    margin: 0 5px;
+    font-size: 24px;
+    line-height: 150px;
+    transition: border-color 0.3s ease;
+  }
+
+  .round1, .round2, .round3 {
+    border-color: #ccc;
+  }
+
+  .line {
+    flex: 1;
+    height: 5px;
+    background-color: #ccc;
+    margin: 0 5px;
+  }
+
+  .highlight {
+    border-color: yellow;
+    animation: highlightAnimation 1s alternate infinite ease-in-out;
+  }
+
+  @keyframes highlightAnimation {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.2);
+    }
+  }
+
+  .popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 80px;
+    border-radius: 40px;
+    z-index: 999;
+  }
+
+  .popup p {
+    font-size: 48px;
+    margin: 0;
+  }
+
+  .popup-animation {
+    animation: popupAnimation 1s ease forwards;
+  }
+
+  .timer {
+    font-size: 100px;
+  }
+
+  .rocket {
+    position: absolute;
+    right: 50px;
+    bottom: 10%; /* Adjust the starting position */
+    width: 200px; /* Adjust the size as needed */
+    height: auto;
+    animation: rocketAnimation 2s linear infinite; /* Change the animation */
+  }
+
+  @keyframes rocketAnimation {
+    0% {
+      transform: translateY(100%);
+    }
+    100% {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes popupAnimation {
+    0% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media only screen and (max-width: 400px) {
+    .timer {
+      font-size: 40px;
+    }
+    .popup {
+      padding: 40px;
+      border-radius: 30px;
+    }
+    .popup p {
+      font-size: 36px;
+    }
+  }
+</style>
+</head>
+<body>
+<br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
+<div class="container" id="startContainer">
+  <button class="button large-button" onclick="startTimer()">Start</button>
+</div>
+
+<div class="container" id="timerContainer" style="display: none;">
+  <div class="timer-container">
+    <p class="timer" id="demo">24 00m 00s</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="round-container" id="roundcon">
+    <div class="round round1">PHASE-1</div>
+    <div class="line"></div>
+    <div class="round round2">PHASE-2</div>
+    <div class="line"></div>
+    <div class="round round3">PHASE-3</div>
+  </div>
+</div>
+
+<div class="button-container" id="resetButton">
+  <button class="button" onclick="resetTimer()">Reset</button>
+</div>
+
+<div class="popup" id="popup">
+  <p>CODING BEGINS!</p>
+</div>
+
+<div class="popup" id="countdownCompletedPopup">
+  <p>Countdown completed!</p>
+</div>
+
+<!-- Rocket Image -->
+<img src="rocket.png" class="rocket" alt="Rocket">
+
+<script>
+var x;
+
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Space') {
+    event.preventDefault();
+    startTimer();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  var storedCountdownTime = localStorage.getItem('countdownTime');
+  if (storedCountdownTime) {
+    var storedTime = new Date(storedCountdownTime).getTime();
+    startTimer(storedTime);
+  }
+});
+
+function startTimer(startTime) {
+  document.getElementById("startContainer").style.display = "none";
+  document.getElementById("timerContainer").style.display = "block";
+  document.getElementById("roundcon").style.display = "flex"; // Show the round container
+
+  countDownDate = startTime || new Date().getTime() + (24 * 60 * 60 * 1000);
+  localStorage.setItem('countdownTime', new Date(countDownDate).toISOString());
+
+  if (!startTime) {
+    var popup = document.getElementById("popup");
+    popup.style.display = "block";
+    popup.classList.add("popup-animation");
+    setTimeout(function(){
+      popup.style.display = "none";
+      popup.classList.remove("popup-animation");
+    }, 3000);
+  }
+
+  x = setInterval(function() {
+    var now = new Date().getTime();
+    var distance = countDownDate - now;
+
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("demo").innerHTML = hours + "h : "
+    + minutes + "m : " + seconds + "s ";
+
+    if (hours >= 18) {
+      document.getElementsByClassName("round1")[0].classList.add("highlight");
+    } else {
+      document.getElementsByClassName("round1")[0].classList.remove("highlight");
+    }
+
+    if (hours >= 8 && hours < 18) {
+      document.getElementsByClassName("round2")[0].classList.add("highlight");
+    } else {
+      document.getElementsByClassName("round2")[0].classList.remove("highlight");
+    }
+
+    if (hours < 8) {
+      document.getElementsByClassName("round3")[0].classList.add("highlight");
+    } else {
+      document.getElementsByClassName("round3")[0].classList.remove("highlight");
+    }
+
+    if (distance < 0) {
+      clearInterval(x);
+      document.getElementById("demo").innerHTML = "EXPIRED";
+      var countdownCompletedPopup = document.getElementById("countdownCompletedPopup");
+      countdownCompletedPopup.style.display = "block";
+      countdownCompletedPopup.classList.add("popup-animation");
+      setTimeout(function(){
+        countdownCompletedPopup.style.display = "none";
+        countdownCompletedPopup.classList.remove("popup-animation");
+      }, 3000);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(x);
+  localStorage.removeItem('countdownTime');
+  document.getElementById("demo").innerHTML = "24h 00m 00s";
+  document.getElementById("startContainer").style.display = "block";
+  document.getElementById("timerContainer").style.display = "none";
+  document.getElementById("roundcon").style.display = "none"; // Hide the round container
+  document.getElementsByClassName("round1")[0].classList.remove("highlight");
+  document.getElementsByClassName("round2")[0].classList.remove("highlight");
+  document.getElementsByClassName("round3")[0].classList.remove("highlight");
+}
+</script>
+</body>
+</html>
